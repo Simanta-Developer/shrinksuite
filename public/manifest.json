@@ -4,9 +4,17 @@
   "description": "Compress images, videos, and PDFs directly in your browser.",
   "version": "1.0",
   "action": {
-    "default_popup": "index.html"
+    "default_title": "Open ShrinkSuite"
   },
-  "permissions": ["storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["sidePanel", "storage"],
+  "side_panel": {
+    "default_path": "src/sidepanel/index.html"
+  },
   "icons": {
+
   }
 }
+
