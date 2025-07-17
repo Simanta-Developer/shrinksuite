@@ -1,23 +1,33 @@
-// CompressControls.tsx
-import React from 'react';
-
+// components/CompressControls.tsx
 interface CompressControlsProps {
-  file: File | null;
-  loading: boolean;
-  handleCompress: () => void | Promise<void>;
+  onCompress: () => Promise<void>;
+  isCompressed: boolean;
+  disabled?: boolean;
 }
 
-const CompressControls: React.FC<CompressControlsProps> = ({ handleCompress, loading, file }) => {
+export default function CompressControls({
+  onCompress,
+  isCompressed,
+  disabled = false,
+}: CompressControlsProps) {
   return (
-    <button
-      onClick={handleCompress}
-      disabled={loading || !file}
-      className={`w-full mt-2 p-2 rounded text-white font-semibold transition-colors duration-200
-        ${loading || !file ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
-    >
-      {loading ? 'Compressing...' : 'Compress'}
-    </button>
+    <div className="flex justify-center">
+      <button
+        onClick={onCompress}
+        disabled={disabled || isCompressed}
+        className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-semibold ${
+          (disabled || isCompressed) ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
+      >
+        {isCompressed ? 'Compressed!' : 'Compress File'}
+      </button>
+    </div>
   );
-};
+}
 
-export default CompressControls;
+
+
+
+
+
+

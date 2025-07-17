@@ -1,51 +1,31 @@
-import React, { useState } from 'react';
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
-import { compressFileByTypes } from '../utils/compressFileTypes';
-
-import FileInput from '../components/FileInput';
-import FileTargetSizeInput from '../components/FileTargetSizeInput';
+import { useState } from 'react';
+import Dropzone from '../components/Dropzone';
 import CompressControls from '../components/CompressControls';
+import DownloadButton from '../components/DownloadButton';
+import FileTargetSizeInput from '../components/FileTargetSizeInput';
+import { compressFileByTypes } from '../utils/compressFileTypes';
 import ErrorBanner from '../components/ErrorBanner';
 
-const ffmpeg = createFFmpeg({ log: false });
 
-const App: React.FC = () => {
+
+export default function App() {
   const [file, setFile] = useState<File | null>(null);
+  const [compressedFileUrl, setCompressedFileUrl] = useState<string | null>(null);
+  const [isCompressed, setIsCompressed] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  const [targetSize, setTargetSize] = useState<number>(100);
+
+  const [targetSize, setTargetSize] = useState<number | null>(null);
   const [targetUnit, setTargetUnit] = useState<'KB' | 'MB' | 'GB'>('KB');
 
-  const handleFileChange = (selectedFile: File | null) => {
-    setFile(selectedFile);
-    setError(null); // Clear previous errors
-  };
+  const isDisabled = !file;
 
-  const getVideoDuration = async (file: File): Promise<number | undefined> => {
-    if (!ffmpeg.isLoaded()) await ffmpeg.load();
-
-    const inputName = 'input.mp4';
-    ffmpeg.FS('writeFile', inputName, await fetchFile(file));
-
-    let stderrLogs = '';
-    ffmpeg.setLogger(({ type, message }) => {
-      if (type === 'fferr') stderrLogs += message + '\n';
-    });
-
-    try {
-      await ffmpeg.run('-i', inputName);
-    } catch {
-      // Expected failure, just capturing logs
-    }
-
-    const match = stderrLogs.match(/Duration:\s(\d+):(\d+):([\d.]+)/);
-    if (match) {
-      const [, hh, mm, ss] = match;
-      return +hh * 3600 + +mm * 60 + +ss;
-    }
-
-    return undefined;
+  const handleFileReset = () => {
+    setFile(null);
+    setCompressedFileUrl(null);
+    setIsCompressed(false);
+    setTargetSize(0);
+    setTargetUnit('KB');
+    setError(null);
   };
 
   const handleCompress = async () => {
@@ -54,72 +34,55 @@ const App: React.FC = () => {
       return;
     }
 
-    setError(null);
-    setLoading(true);
-    setDownloadUrl(null);
-
-    const multiplier =
-      targetUnit === 'KB' ? 1024 :
-      targetUnit === 'MB' ? 1024 * 1024 :
-      1024 * 1024 * 1024;
-
-    const targetSizeBytes = targetSize * multiplier;
+    const targetSizeBytes = targetSize * 1024;
 
     try {
-      let durationInSec: number | undefined = undefined;
-
-      if (file.type.startsWith('video/')) {
-        durationInSec = await getVideoDuration(file);
-        if (!durationInSec) {
-          console.warn('Could not extract video duration');
-        }
-      }
-
-      const compressedFile = await compressFileByTypes(file, targetSizeBytes, durationInSec);
-      const blobUrl = URL.createObjectURL(compressedFile);
-      setDownloadUrl(blobUrl);
-    } catch (err: unknown) {
-      console.error('Compression error:', err);
-      setError(err instanceof Error ? err.message : 'Compression failed.');
-    } finally {
-      setLoading(false);
+      const compressed = await compressFileByTypes(file, targetSizeBytes);
+      setCompressedFileUrl(URL.createObjectURL(compressed));
+      setIsCompressed(true);
+    } catch (err) {
+      console.error('Compression failed:', err);
     }
-  };
+};
 
   return (
-    <div style={{ padding: '1rem', width: '300px', fontFamily: 'Arial' }}>
-      <h2>ShrinkSuite</h2>
+    <div className="p-4 font-sans text-base flex flex-col items-center gap-y-6">
+      <h1 className="text-3xl font-bold">ShrinkSuite</h1>
 
-      <FileInput onFileSelect={handleFileChange} />
+      <Dropzone setFile={setFile} onReset={handleFileReset} />
+
       <ErrorBanner message={error || ''} />
 
       {file && <p><strong>Selected:</strong> {file.name}</p>}
 
-      <FileTargetSizeInput
-        targetSize={targetSize}
-        setTargetSize={setTargetSize}
-        targetUnit={targetUnit}
-        setTargetUnit={setTargetUnit}
-      />
+      <div className="mt-2 space-y-8">
+        <FileTargetSizeInput
+          targetSize={targetSize}
+          targetUnit={targetUnit}
+          setTargetSize={setTargetSize}
+          setTargetUnit={setTargetUnit}
+          disabled={isDisabled}
+        />
+      </div>
 
-      <CompressControls
-        file={file}
-        loading={loading}
-        handleCompress={handleCompress}
-      />
+      <div className="mt-2 space-y-8">
+        <CompressControls
+          onCompress={handleCompress}
+          isCompressed={isCompressed}
+          disabled={isDisabled}
+        />
+      </div>
 
-      {downloadUrl && (
-        <div style={{ marginTop: '1rem' }}>
-          <a href={downloadUrl} download={`compressed_${file?.name ?? 'file'}`}>
-            Download Compressed File
-          </a>
-        </div>
-      )}
+      {compressedFileUrl && file && (
+      <DownloadButton fileUrl={compressedFileUrl} fileName={`compressed_${file.name}`} />
+)}
     </div>
   );
-};
+}
 
-export default App;
+
+
+
 
 
 

@@ -1,6 +1,7 @@
 import { compressImage } from './compressImage';
 import { compressVideo } from './compressVideo';
 import { compressPdf } from './compressPdf';
+import { getVideoDuration } from './getVideoDuration';
 
 /**
  * Returns compressed file only if smaller or equal to the original file.
@@ -44,6 +45,10 @@ export async function compressFileByTypes(
     }
 
     if (mimeType.startsWith('video/')) {
+      durationInSec = await getVideoDuration(file);
+      if (!durationInSec) {
+        console.warn('Could not extract video duration');
+      }
       const compressed = await compressVideo(file, targetSizeBytes, durationInSec);
       return returnSmallerOrOriginal(file, compressed);
     }
