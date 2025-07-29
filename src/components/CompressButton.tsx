@@ -1,15 +1,14 @@
-// components/CompressControls.tsx
-interface CompressControlsProps {
+interface CompressButtonProps {
   onCompress: () => Promise<void>;
   isCompressed: boolean;
   disabled?: boolean;
 }
 
-export default function CompressControls({
+export default function CompressButton({
   onCompress,
   isCompressed,
   disabled = false,
-}: CompressControlsProps) {
+}: CompressButtonProps) {
   return (
     <div className="flex justify-center">
       <button
@@ -24,10 +23,3 @@ export default function CompressControls({
     </div>
   );
 }
-
-
-
-
-
-
-

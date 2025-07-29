@@ -26,7 +26,7 @@ export default function Dropzone({ setFile, onReset }: { setFile: (f: File) => v
       }}
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
-      className="border-2 border-dashed border-gray-500 rounded-lg h-[35vh] flex items-center justify-center text-center cursor-pointer text-gray-600 mb-6"
+      className="border-2 border-dashed border-gray-500 rounded-lg h-[50vh] w-[80vw] flex items-center justify-center text-center cursor-pointer text-gray-600 mb-6"
     >
       <input
         type="file"
