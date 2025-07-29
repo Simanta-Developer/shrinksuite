@@ -14,10 +14,12 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic'
+    }),
     wasm(),
     topLevelAwait(),
-    visualizer({ filename: 'dist/stats.html', gzipSize: true, brotliSize: true }),
+    visualizer({ filename: 'dist/stats.html', gzipSize: true, brotliSize: true })
   ],
 
   assetsInclude: ['**/*.wasm'],
@@ -47,7 +49,6 @@ export default defineConfig({
       },
 
       output: {
-        // Only chunk public React exports, avoid internal cjs dev paths
         manualChunks: {
           react: ['react'],
           reactDomClient: ['react-dom/client'],
