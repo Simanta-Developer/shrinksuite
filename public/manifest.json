@@ -4,7 +4,12 @@
   "description": "Compress images, videos, and PDFs directly in your browser.",
   "version": "1.0",
   "action": {
-    "default_title": "Open ShrinkSuite"
+    "default_title": "Open ShrinkSuite",
+    "default_icon": {
+      "16": "icons/icon_16x16.png",
+      "48": "icons/icon_48x48.png",
+      "128": "icons/icon_128x128.png"
+    }
   },
   "background": {
     "service_worker": "background.js"
@@ -14,7 +19,9 @@
     "default_path": "src/sidepanel/index.html"
   },
   "icons": {
-
+    "16": "icons/icon_16x16.png",
+    "48": "icons/icon_48x48.png",
+    "128": "icons/icon_128x128.png"
   }
 }
 
