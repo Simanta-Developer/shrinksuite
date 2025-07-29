@@ -1,12 +1,21 @@
-import { useState } from 'react';
+import { useState, Suspense, lazy } from 'react';
 import Dropzone from '../components/Dropzone';
-import CompressControls from '../components/CompressControls';
-import DownloadButton from '../components/DownloadButton';
 import FileTargetSizeInput from '../components/FileTargetSizeInput';
 import { compressFileByTypes } from '../utils/compressFileTypes';
-import ErrorBanner from '../components/ErrorBanner';
+import ErrorBanner from '../components/ErrorMessage';
 
+// Lazy load components to reduce initial bundle size
+const CompressButton = lazy(() => import('../components/CompressButton'));
+const DownloadButton = lazy(() => import('../components/DownloadButton'));
 
+function toBytes(size: number, unit: 'KB' | 'MB' | 'GB'): number {
+  switch(unit) {
+    case 'KB': return size * 1024;
+    case 'MB': return size * 1024 * 1024;
+    case 'GB': return size * 1024 * 1024 * 1024;
+    default: return size * 1024; // default fallback to KB
+  }
+}
 
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
@@ -23,7 +32,7 @@ export default function App() {
     setFile(null);
     setCompressedFileUrl(null);
     setIsCompressed(false);
-    setTargetSize(0);
+    setTargetSize(null);
     setTargetUnit('KB');
     setError(null);
   };
@@ -34,16 +43,18 @@ export default function App() {
       return;
     }
 
-    const targetSizeBytes = targetSize * 1024;
+    const targetSizeBytes = toBytes(targetSize, targetUnit);
 
     try {
       const compressed = await compressFileByTypes(file, targetSizeBytes);
       setCompressedFileUrl(URL.createObjectURL(compressed));
       setIsCompressed(true);
+      setError(null);
     } catch (err) {
       console.error('Compression failed:', err);
+      setError('Compression failed. Please try a different file or target size.');
     }
-};
+  };
 
   return (
     <div className="p-4 font-sans text-base flex flex-col items-center gap-y-6">
@@ -51,7 +62,7 @@ export default function App() {
 
       <Dropzone setFile={setFile} onReset={handleFileReset} />
 
-      <ErrorBanner message={error || ''} />
+      <ErrorBanner message={error} />
 
       {file && <p><strong>Selected:</strong> {file.name}</p>}
 
@@ -66,24 +77,20 @@ export default function App() {
       </div>
 
       <div className="mt-2 space-y-8">
-        <CompressControls
-          onCompress={handleCompress}
-          isCompressed={isCompressed}
-          disabled={isDisabled}
-        />
+        <Suspense fallback={<div>Loading controls...</div>}>
+          <CompressButton
+            onCompress={handleCompress}
+            isCompressed={isCompressed}
+            disabled={isDisabled}
+          />
+        </Suspense>
       </div>
 
       {compressedFileUrl && file && (
-      <DownloadButton fileUrl={compressedFileUrl} fileName={`compressed_${file.name}`} />
-)}
+        <Suspense fallback={<div>Loading download button...</div>}>
+          <DownloadButton fileUrl={compressedFileUrl} fileName={`compressed_${file.name}`} />
+        </Suspense>
+      )}
     </div>
   );
 }
-
-
-
-
-
-
-
-
