@@ -1,7 +1,7 @@
 {
   "files": [],
   "compilerOptions": {
-    "types": ["node"],
+    "types": ["chrome", "node"],
     "jsx": "react-jsx",
   },
   "references": [

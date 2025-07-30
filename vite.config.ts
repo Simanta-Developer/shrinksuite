@@ -41,18 +41,16 @@ export default defineConfig({
     sourcemap: false,
     minify: 'esbuild',
     outDir: 'dist',
-
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
         sidepanel: resolve(__dirname, 'src/sidepanel/index.html'),
       },
-
       output: {
         manualChunks: {
-          react: ['react'],
-          reactDomClient: ['react-dom/client'],
-          wasmTools: ['@ffmpeg/ffmpeg', '@zfanta/ghostscript-wasm'],
+          vendor: ['react', 'react-dom/client'],
+          ffmpeg: ['@ffmpeg/ffmpeg'],
+          ghostscript: ['@zfanta/ghostscript-wasm']
         },
 
         chunkFileNames: 'js/[name]-[hash].js',
