@@ -20,21 +20,25 @@ function toBytes(size: number, unit: 'KB' | 'MB' | 'GB'): number {
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
   const [compressedFileUrl, setCompressedFileUrl] = useState<string | null>(null);
-  const [isCompressed, setIsCompressed] = useState(false);
+  const [isCompressed, setIsCompressed] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [compressing, setCompressing] = useState<boolean>(false);
 
   const [targetSize, setTargetSize] = useState<number | null>(null);
   const [targetUnit, setTargetUnit] = useState<'KB' | 'MB' | 'GB'>('KB');
 
-  const isDisabled = !file;
+  const isFileNotSelected = !file;
 
   const handleFileReset = () => {
+    if(compressing) return;
+    
     setFile(null);
     setCompressedFileUrl(null);
     setIsCompressed(false);
     setTargetSize(null);
     setTargetUnit('KB');
     setError(null);
+    setCompressing(false);
   };
 
   const handleCompress = async () => {
@@ -43,22 +47,45 @@ export default function App() {
       return;
     }
 
+    setError(null);
+    setCompressing(true);
+
     const targetSizeBytes = toBytes(targetSize, targetUnit);
-    const compressed = await compressFileByTypes(file, targetSizeBytes);
-    if(!compressed) {
-      setError('Compression failed. Please try a different file or target size.')
+    let compressed: File | null | void;
+
+    try {
+      compressed = await compressFileByTypes(file, targetSizeBytes);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || 'Compression failed unexpectedly.');
+      } else {
+        setError('Compression failed unexpectedly.');
+      }
+      setCompressing(false);
       return;
     }
+
+    if (compressed === null) {
+      setError('Compression not possible at this size—please select a larger target.');
+      setCompressing(false);
+      return;
+    }
+
     setCompressedFileUrl(URL.createObjectURL(compressed));
     setIsCompressed(true);
     setError(null);
+    setCompressing(false);
   };
 
   return (
     <div className="p-4 font-sans text-base flex flex-col items-center gap-y-6">
       <h1 className="text-3xl font-bold">ShrinkSuite</h1>
 
-      <Dropzone setFile={setFile} onReset={handleFileReset} />
+      <Dropzone 
+        setFile={setFile} 
+        onReset={handleFileReset}
+        disabled ={compressing}
+      />
 
       <ErrorBanner message={error} />
 
@@ -70,7 +97,7 @@ export default function App() {
           targetUnit={targetUnit}
           setTargetSize={setTargetSize}
           setTargetUnit={setTargetUnit}
-          disabled={isDisabled}
+          disabled={isFileNotSelected || compressing}
         />
       </div>
 
@@ -79,7 +106,8 @@ export default function App() {
           <CompressButton
             onCompress={handleCompress}
             isCompressed={isCompressed}
-            disabled={isDisabled}
+            isCompressing={compressing}
+            disabled={isFileNotSelected || compressing}
           />
         </Suspense>
       </div>

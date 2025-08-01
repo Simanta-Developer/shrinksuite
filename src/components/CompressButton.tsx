@@ -1,12 +1,14 @@
 interface CompressButtonProps {
   onCompress: () => Promise<void>;
   isCompressed: boolean;
+  isCompressing: boolean;
   disabled?: boolean;
 }
 
 export default function CompressButton({
   onCompress,
   isCompressed,
+  isCompressing,
   disabled = false,
 }: CompressButtonProps) {
   return (
@@ -18,7 +20,11 @@ export default function CompressButton({
           (disabled || isCompressed) ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
-        {isCompressed ? 'Compressed!' : 'Compress File'}
+        {isCompressing
+          ? 'Compressing...'
+          : isCompressed
+          ? 'Compressed!'
+          : 'Compress File'}
       </button>
     </div>
   );
