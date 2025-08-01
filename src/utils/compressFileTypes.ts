@@ -30,7 +30,7 @@ export async function compressFileByTypes(
       if(!compressed){
         return;
       }
-      return file;
+      return compressed;
     }
 
     if (mimeType.startsWith('video/')) {
@@ -38,7 +38,7 @@ export async function compressFileByTypes(
       if(!compressed){
         return;
       }
-      return file;
+      return compressed;
     }
 
     if (mimeType === 'application/pdf') {
@@ -46,7 +46,7 @@ export async function compressFileByTypes(
       if(!compressed){
         return;
       }
-      return file;
+      return compressed;
     }
   } catch (err) {
     console.error(`❌ Compression failed for ${mimeType}:`, err);
