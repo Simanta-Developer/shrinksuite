@@ -33,7 +33,7 @@ export default function Dropzone({ setFile, onReset }: { setFile: (f: File) => v
         ref={inputRef}
         className="hidden"
         onChange={handleFileChange}
-        accept="image/*,application/pdf"
+        accept="image/*,application/pdf,video/*"
       />
       Drag and drop your file here, or click to browse
     </div>
