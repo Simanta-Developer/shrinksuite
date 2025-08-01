@@ -49,7 +49,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom/client'],
-          ffmpeg: ['@ffmpeg/ffmpeg'],
           ghostscript: ['@zfanta/ghostscript-wasm']
         },
 
