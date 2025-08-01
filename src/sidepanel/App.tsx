@@ -44,16 +44,14 @@ export default function App() {
     }
 
     const targetSizeBytes = toBytes(targetSize, targetUnit);
-
-    try {
-      const compressed = await compressFileByTypes(file, targetSizeBytes);
-      setCompressedFileUrl(URL.createObjectURL(compressed));
-      setIsCompressed(true);
-      setError(null);
-    } catch (err) {
-      console.error('Compression failed:', err);
-      setError('Compression failed. Please try a different file or target size.');
+    const compressed = await compressFileByTypes(file, targetSizeBytes);
+    if(!compressed) {
+      setError('Compression failed. Please try a different file or target size.')
+      return;
     }
+    setCompressedFileUrl(URL.createObjectURL(compressed));
+    setIsCompressed(true);
+    setError(null);
   };
 
   return (
