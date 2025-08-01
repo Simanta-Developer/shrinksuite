@@ -1,33 +1,29 @@
 import imageCompression from 'browser-image-compression';
+import { MIN_QUALITY, MAX_QUALITY, FILE_TYPE, QUALITY_PRECISION } from '../constants/imageConstants';
 
 /**
- * Compresses an image file to be as close as possible to the target size using binary search over quality.
- * 
+ * Compresses an image file to be as close as possible to the target size 
+ * using a binary search over quality.
+ *
  * @param file - The input image file
  * @param targetSizeBytes - Desired maximum file size in bytes
- * @returns A new File object (compressed), or original file if compression not possible
+ * @returns A new compressed File object, or null if no suitable compression is found.
  */
-export async function compressImage(file: File, targetSizeBytes: number): Promise<File> {
-
-  const maxIterations = 8;
-  const tolerance = 5 * 1024; // 5 KB buffer
-  let low = 0.3;
-  let high = 1.0;
-  let iteration = 0;
+export async function compressImage(file: File, targetSizeBytes: number): Promise<File | null> {
+  let low = MIN_QUALITY;
+  let high = MAX_QUALITY;
 
   let bestFile: File | null = null;
-  let bestSize = 0;
-  let bestQuality = 0;
   let bestDiff = Infinity;
 
-  while (iteration < maxIterations && high - low > 0.01) {
+  while (high - low > QUALITY_PRECISION) {
     const midQuality = (low + high) / 2;
 
     const options = {
-      maxSizeMB: targetSizeBytes / 1024 / 1024, // still needed for fallback
+      maxSizeMB: targetSizeBytes / 1024 / 1024,
       initialQuality: midQuality,
       useWebWorker: true,
-      fileType: 'image/jpeg',
+      fileType: FILE_TYPE,
     };
 
     try {
@@ -35,47 +31,25 @@ export async function compressImage(file: File, targetSizeBytes: number): Promis
       const size = compressed.size;
       const diff = Math.abs(targetSizeBytes - size);
 
-      console.log(
-        `Attempt ${iteration + 1}: quality=${midQuality.toFixed(2)}, size=${(size / 1024).toFixed(2)} KB`
-      );
-
-      if (size <= targetSizeBytes + tolerance && diff < bestDiff) {
+      // If the compression is valid (under target) and better than our last best attempt, store it.
+      if (size <= targetSizeBytes && diff < bestDiff) {
         bestFile = compressed;
-        bestSize = size;
-        bestQuality = midQuality;
         bestDiff = diff;
       }
 
       if (size > targetSizeBytes) {
-        high = midQuality;
+        high = midQuality; // Result is too big, aim for lower quality
       } else {
-        low = midQuality;
+        low = midQuality;  // Result is good, aim for even higher quality
       }
-
-    } catch (err) {
-      console.error('❌ Compression error:', err);
-      break;
+    } catch {
+      throw new Error('Something went wrong at PDF compression...');
     }
-
-    iteration++;
   }
 
-  console.log(`Original size: ${(file.size / 1024).toFixed(2)} KB`);
   if (bestFile) {
-    console.log(`✅ Final size: ${(bestSize / 1024).toFixed(2)} KB at quality=${bestQuality.toFixed(2)}`);
     return bestFile;
-  } else {
-    console.log(`❌ No valid compression under ${(targetSizeBytes / 1024).toFixed(2)} KB — returning original file`);
-    return file;
   }
+
+  return null;
 }
-
-
-
-
-
-
-
-
-
-

@@ -16,6 +16,3 @@ export const PDF_DEVICE = '-sDEVICE=pdfwrite';
 /** Supported PDF quality levels ordered from lowest to highest */
 export const PDF_QUALITY_LEVELS = ['screen', 'ebook', 'printer', 'prepress'] as const;
 export type PdfQuality = typeof PDF_QUALITY_LEVELS[number];
-
-/** Allowed tolerance when comparing file size against target (in bytes) */
-export const SIZE_TOLERANCE_BYTES = 1024; // 1 KB

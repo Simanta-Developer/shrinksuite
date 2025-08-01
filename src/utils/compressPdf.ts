@@ -6,7 +6,6 @@ import {
   GHOSTSCRIPT_QUIET_FLAGS,
   PDF_DEVICE,
   PDF_QUALITY_LEVELS,
-  SIZE_TOLERANCE_BYTES,
 } from '../constants/pdfConstants'; 
 import type { PdfQuality } from '../constants/pdfConstants';
 
@@ -57,7 +56,7 @@ function buildGhostscriptArgs(
  * @param targetSizeBytes Desired maximum output size in bytes.
  * @returns A Promise resolving to a new compressed File or original file if compression failed.
  */
-export async function compressPdf(file: File, targetSizeBytes: number): Promise<File> {
+export async function compressPdf(file: File, targetSizeBytes: number): Promise<File | null> {
   const wasmUrl = getWasmPath();
 
   // Warm-up WASM in the browser cache to prevent async race conditions during instantiation
@@ -102,12 +101,8 @@ export async function compressPdf(file: File, targetSizeBytes: number): Promise<
         const compressedData = gs.FS.readFile(outputFileName);
         const compressedSize = compressedData.byteLength;
 
-        console.log(
-          `[Ghostscript] Compression quality: ${quality}, size: ${(compressedSize / 1024).toFixed(2)} KB`
-        );
-
         // Check if compressed size is within target (+ tolerance)
-        if (compressedSize <= targetSizeBytes + SIZE_TOLERANCE_BYTES) {
+        if (compressedSize <= targetSizeBytes) {
           // Update best result if smaller size found
           if (compressedSize < bestCompressedSize) {
             bestCompressedData = compressedData;
@@ -123,13 +118,8 @@ export async function compressPdf(file: File, targetSizeBytes: number): Promise<
 
         // Clean up output file from WASM FS to avoid clutter
         gs.FS.unlink(outputFileName);
-      } catch (err) {
-        console.warn(
-          `[Ghostscript] Compression attempt failed at quality "${quality}":`,
-          err
-        );
-        // Skip this level and try lower qualities
-        high = mid - 1;
+      } catch { 
+        throw new Error('Something went wrong at PDF compression...');
       }
     }
   } finally {
@@ -142,16 +132,12 @@ export async function compressPdf(file: File, targetSizeBytes: number): Promise<
   }
 
   if (bestCompressedData && bestQualityLevel) {
-    console.log(
-      `[Ghostscript] Selected best quality: ${bestQualityLevel}, size: ${(bestCompressedSize / 1024).toFixed(2)} KB`
-    );
     return new File([bestCompressedData], `compressed_${file.name}`, {
       type: 'application/pdf',
     });
   }
 
-  console.warn('[Ghostscript] No suitable compression found; returning original file.');
-  return file;
+  return null;
 }
 
 
