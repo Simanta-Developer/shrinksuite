@@ -20,9 +20,12 @@ export default function FileTargetSizeInput({
         min={0.1}
         step={0.1}
         value={targetSize ?? ''}
-        onChange={(e) => setTargetSize(Number(e.target.value))}
+        onChange={(e) => {
+          const value = e.target.value;
+          setTargetSize(value === '' ? null : Number(value));
+        }}
         className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"
-        placeholder="Target size"
+        placeholder="Enter max size"
         disabled={disabled}
       />
       
@@ -39,4 +42,3 @@ export default function FileTargetSizeInput({
     </div>
   );
 }
-

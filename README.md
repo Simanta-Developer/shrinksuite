@@ -11,12 +11,13 @@ ShrinkSuite is a Chrome extension that allows you to compress images, videos, an
 ## ✨ Features
 
 - **🖼️ Image Compression**: Compress JPEG, PNG, and other image formats with adjustable quality
-- **🎥 Video Compression**: Reduce video file sizes using FFmpeg with CRF and bitrate controls
+- **🎥 Video Compression**: Reduce video file size using mediabunny
 - **📄 PDF Compression**: Compress PDF documents using Ghostscript with multiple quality levels
 - **🔒 Privacy-First**: All processing happens locally - no files are uploaded to servers
 - **⚡ Fast Processing**: WebAssembly-powered compression for optimal performance
 - **🎯 Target Size Control**: Set specific target file sizes for precise compression
 - **📱 Side Panel UI**: Convenient side panel interface integrated into Chrome
+
 
 ## 🚀 Installation
 
@@ -49,8 +50,12 @@ npm run build
 # For development
 npm run dev
 ```
+### Available Scripts
 
-## 🛠️ Development Setup
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+```
 
 ### Prerequisites
 
@@ -69,35 +74,26 @@ shrinksuite/
 │   ├── components/           # React components
 │   ├── sidepanel/           # Side panel implementation
 │   └── utils/               # Compression utilities
+│   └── constants/           # Tuning parameters
 ├── scripts/
 │   └── copy-wasm.js         # WASM file copying script
 └── package.json
 ```
 
-### Available Scripts
-
-```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run lint     # Run ESLint
-npm run preview  # Preview production build
-```
-
-### Loading in Chrome
-
-1. Run `npm run build`
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode"
-4. Click "Load unpacked" and select the `dist` folder
-
 ## 💻 Technology Stack
 
-- **Frontend**: React 19, TypeScript, TailwindCSS
-- **Build Tool**: Vite with custom configuration
-- **Image Compression**: browser-image-compression
-- **Video Compression**: FFmpeg.wasm
-- **PDF Compression**: Ghostscript WASM (@zfanta/ghostscript-wasm)
-- **PDF Manipulation**: pdf-lib
+| Layer | Library / Tool |
+|-------|----------------|
+| Framework | React 19 + TypeScript |
+| Bundler | Vite 7 |
+| Styles | TailwindCSS 3 |
+| Image Compression | **browser-image-compression** |
+| Video Compression | **mediabunny** (FFmpeg.wasm wrapper) |
+| PDF Compression | **@zfanta/ghostscript-wasm** + **pdf-lib** |
+| Build Visualisation | rollup-plugin-visualizer |
+| Linting | ESLint 9 + typescript-eslint + react-hooks |
+
+---
 
 ## 🔧 Usage
 
@@ -117,33 +113,6 @@ npm run preview  # Preview production build
 
 ### Full Support
 - ✅ **Google Chrome** (recommended)
-- ✅ **Microsoft Edge** (Chromium-based)
-- ✅ **Opera** (Chromium-based)
-
-### Limited Support
-- ⚠️ **Firefox**: Requires modifications for sidebar API compatibility
-- ⚠️ **Safari**: Requires significant architecture changes
-
-## 📦 Publishing
-
-### Chrome Web Store
-
-1. **Developer Registration**: 
-   - Register at [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/developer/dashboard)
-   - Pay $5 one-time registration fee
-
-2. **Prepare Extension**:
-   ```bash
-   npm run build
-   # Create ZIP file from dist/ folder
-   ```
-
-3. **Submit**: Upload ZIP file and complete store listing
-
-### Microsoft Edge Add-ons
-
-1. Register at [Microsoft Edge Add-ons Developer Portal](https://partner.microsoft.com/dashboard/microsoftedge)
-2. Use the same build as Chrome (fully compatible)
 
 ## 🤝 Contributing
 
@@ -173,10 +142,6 @@ We welcome contributions! Please follow these steps:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👨‍💻 Author
-
-**Simanta Raj Deb**
-
 ## 🔗 Links
 
 - [Chrome Web Store](https://chrome.google.com/webstore) (coming soon)
@@ -190,10 +155,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **PDF Compression**: Uses Ghostscript's multiple quality levels (screen, ebook, printer, prepress)
 - **Memory Usage**: WebAssembly operations are memory-intensive; close other browser tabs for large files
 
-## 🔄 Version History
 
-- **v1.0.0**: Initial release with image, video, and PDF compression support
-
----
 
 **Made with ❤️ for privacy-conscious users who need fast, offline file compression**

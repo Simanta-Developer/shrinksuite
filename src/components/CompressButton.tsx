@@ -1,15 +1,16 @@
-// components/CompressControls.tsx
-interface CompressControlsProps {
+interface CompressButtonProps {
   onCompress: () => Promise<void>;
   isCompressed: boolean;
+  isCompressing: boolean;
   disabled?: boolean;
 }
 
-export default function CompressControls({
+export default function CompressButton({
   onCompress,
   isCompressed,
+  isCompressing,
   disabled = false,
-}: CompressControlsProps) {
+}: CompressButtonProps) {
   return (
     <div className="flex justify-center">
       <button
@@ -19,15 +20,12 @@ export default function CompressControls({
           (disabled || isCompressed) ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
-        {isCompressed ? 'Compressed!' : 'Compress File'}
+        {isCompressing
+          ? 'Compressing...'
+          : isCompressed
+          ? 'Compressed!'
+          : 'Compress File'}
       </button>
     </div>
   );
 }
-
-
-
-
-
-
-

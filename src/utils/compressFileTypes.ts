@@ -1,35 +1,20 @@
 import { compressImage } from './compressImage';
 import { compressVideo } from './compressVideo';
 import { compressPdf } from './compressPdf';
-import { getVideoDuration } from './getVideoDuration';
-
-/**
- * Returns compressed file only if smaller or equal to the original file.
- * Otherwise, returns original.
- */
-function returnSmallerOrOriginal(original: File, compressed: File): File {
-  if (compressed.size <= original.size) {
-    return compressed;
-  }
-  console.warn(`⚠️ Compression increased size (${compressed.size} > ${original.size}). Returning original.`);
-  return original;
-}
 
 /**
  * Detects file type and routes to appropriate compression function.
- * Skips compression if target size >= original file size.
+ * Returns the compressed file, or null if compression is not possible at the target size.
  * @param file - The file to compress
  * @param targetSizeBytes - Desired max size in bytes
- * @param durationInSec - (Optional) Video duration in seconds, used for bitrate fallback
- * @returns Compressed file or original if compression fails or increases size
+ * @returns A compressed File, null if target is too small, or throws an error.
  */
 export async function compressFileByTypes(
   file: File,
-  targetSizeBytes: number,
-  durationInSec?: number
-): Promise<File> {
+  targetSizeBytes: number
+): Promise<File | null> {
   if (!targetSizeBytes || isNaN(targetSizeBytes)) {
-    throw new Error('❌ compressFileByTypes: Invalid targetSizeBytes — must be a number in bytes');
+    throw new Error('❌ Invalid targetSizeBytes — must be a number in bytes');
   }
 
   if (file.size <= targetSizeBytes) {
@@ -40,30 +25,20 @@ export async function compressFileByTypes(
 
   try {
     if (mimeType.startsWith('image/')) {
-      const compressed = await compressImage(file, targetSizeBytes);
-      return returnSmallerOrOriginal(file, compressed);
+      return await compressImage(file, targetSizeBytes);
     }
 
     if (mimeType.startsWith('video/')) {
-      durationInSec = await getVideoDuration(file);
-      if (!durationInSec) {
-        console.warn('Could not extract video duration');
-      }
-      const compressed = await compressVideo(file, targetSizeBytes, durationInSec);
-      return returnSmallerOrOriginal(file, compressed);
+      return await compressVideo(file, targetSizeBytes);
     }
 
     if (mimeType === 'application/pdf') {
-      const compressed = await compressPdf(file, targetSizeBytes);
-      return returnSmallerOrOriginal(file, compressed);
+      return await compressPdf(file, targetSizeBytes);
     }
-  } catch (err) {
-    console.error(`❌ Compression failed for ${mimeType}:`, err);
+  } catch {
+    throw new Error(`Unsupported or uncompressible file type: ${mimeType}`);
   }
 
-  throw new Error(`❌ Unsupported or uncompressible file type: ${mimeType}`);
+  throw new Error(`Unsupported or uncompressible file type: ${mimeType}`);
 }
-
-
-
 
