@@ -8,8 +8,6 @@ ShrinkSuite is a Chrome extension that allows you to compress images, videos, an
 ![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-green)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow)
 
-**Note:** The extension is currently under review. It will be available for use once the review process is complete. Apologies for any inconvenience caused. Thank you for your patience!
-
 ## ✨ Features
 
 - **🖼️ Image Compression**: Compress JPEG, PNG, and other image formats with adjustable quality
